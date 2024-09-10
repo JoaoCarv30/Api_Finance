@@ -1,5 +1,7 @@
 ﻿using System.Transactions;
 using APIMANAGEMENT.Data;
+using APIMANAGEMENT.Data.Dtos;
+using AutoMapper;
 using Management.Models;
 using Management.Models.Enum;
 using Microsoft.AspNetCore.Mvc;
@@ -15,15 +17,18 @@ namespace Management.Controllers
     {
 
         private TransactionContext _context;
+        private IMapper _mapper;
 
-        public ModelTransactionController(TransactionContext context)
+        public ModelTransactionController(TransactionContext context, IMapper mapper)
         {
             _context = context;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public IActionResult AddTransaction([FromBody] ModelTransaction transaction)
+        public IActionResult AddTransaction([FromBody] CreateTransactionDto transactionDto)
         {
+            var transaction = _mapper.Map<ModelTransaction>(transactionDto);
             _context.Add(transaction);
             _context.SaveChanges();
             return Ok(transaction);
@@ -34,7 +39,8 @@ namespace Management.Controllers
         public IActionResult GetTransactions()
         {
             var transactions = _context.Transactions.ToList();
-            return Ok(transactions);
+            var transactionsDto = _mapper.Map<IEnumerable<GetTransactionDto>>(transactions);
+            return Ok(transactionsDto);
         }
 
 
@@ -42,12 +48,14 @@ namespace Management.Controllers
         public IActionResult GetTransaction(int id)
         {
             var transaction = _context.Transactions.FirstOrDefault(t => t.Id == id);
-            return Ok(transaction);
+            var transactionDto = _mapper.Map<GetTransactionDto>(transaction);
+            return Ok(transactionDto);
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateTransaction(int id, [FromBody] ModelTransaction transaction)
+        public IActionResult UpdateTransaction(int id, [FromBody] UpdateTransactionDto transactionDto)
         {
+            var transaction = _mapper.Map<ModelTransaction>(transactionDto);
             var transactionToUpdate = _context.Transactions.FirstOrDefault(t => t.Id == id);
             transactionToUpdate.Type = transaction.Type;
             transactionToUpdate.Description = transaction.Description;
@@ -56,6 +64,7 @@ namespace Management.Controllers
             _context.SaveChanges();
             return Ok(transactionToUpdate);
         }
+        
 
         [HttpDelete("{id}")]
         public IActionResult DeleteTransaction(int id)

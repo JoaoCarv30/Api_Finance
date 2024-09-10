@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<TransactionContext>(options => options.UseMySql(builder.Configuration.GetConnectionString("TransactionConnection"), ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("TransactionConnection"))));
 
+builder.Services.
+AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
 
